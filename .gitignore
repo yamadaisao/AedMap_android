@@ -1,0 +1,9 @@
+dexedLibs
+res
+/bin/AndroidManifest.xml
+/bin/classes.dex
+/bin/jarlist.cache
+/bin/resources.ap_
+classes
+gen
+bin
