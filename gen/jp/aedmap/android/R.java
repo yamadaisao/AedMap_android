@@ -127,22 +127,48 @@ containing a value of this type.
          */
         public static final int zOrderOnTop=0x7f01000d;
     }
+    public static final class color {
+        public static final int cyan=0x7f060003;
+        public static final int dimgrey_half=0x7f060000;
+        public static final int red=0x7f060006;
+        public static final int silver=0x7f060004;
+        public static final int white=0x7f060001;
+        public static final int white_half=0x7f060002;
+        public static final int yellow=0x7f060005;
+    }
+    public static final class dimen {
+        public static final int progress_margin_bottom=0x7f070000;
+    }
     public static final class drawable {
-        public static final int ic_launcher=0x7f020000;
+        public static final int address_border=0x7f020000;
+        public static final int ic_aed=0x7f020001;
+        public static final int ic_center_cross=0x7f020002;
+        public static final int ic_launcher=0x7f020003;
+        public static final int ic_search=0x7f020004;
     }
     public static final class id {
-        public static final int map=0x7f040004;
-        public static final int menu_settings=0x7f040005;
+        public static final int LinearLayout1=0x7f040004;
+        public static final int center=0x7f040007;
+        public static final int frame=0x7f040005;
+        public static final int map=0x7f040006;
+        public static final int menu_settings=0x7f04000c;
         public static final int none=0x7f040000;
         public static final int normal=0x7f040001;
+        public static final int progress=0x7f040008;
         public static final int satellite=0x7f040002;
+        public static final int search_address=0x7f04000b;
         public static final int terrain=0x7f040003;
+        public static final int textView1=0x7f040009;
+        public static final int text_address=0x7f04000a;
+    }
+    public static final class integer {
+        public static final int scheduleAtFixedRate=0x7f080000;
     }
     public static final class layout {
         public static final int activity_aed_map=0x7f030000;
     }
     public static final class menu {
-        public static final int activity_aed_map=0x7f070000;
+        public static final int activity_aed_map=0x7f0a0000;
     }
     public static final class string {
         public static final int app_name=0x7f05000b;
@@ -189,8 +215,24 @@ containing a value of this type.
         Google Play services (from Play Store) [CHAR LIMIT=40] 
          */
         public static final int common_google_play_services_update_title=0x7f050007;
-        public static final int hello_world=0x7f05000c;
-        public static final int menu_settings=0x7f05000d;
+        public static final int http_illegal_state=0x7f050012;
+        public static final int http_io_error=0x7f050014;
+        public static final int http_network_error=0x7f050010;
+        public static final int http_parameter_error=0x7f050015;
+        public static final int http_parse_error=0x7f050013;
+        public static final int http_server_error=0x7f05000d;
+        public static final int http_syntax_error=0x7f05000e;
+        public static final int http_unknown_host=0x7f05000f;
+        public static final int http_unkown_error=0x7f050011;
+        public static final int img_center_cross=0x7f050016;
+        public static final int label_location=0x7f050017;
+        public static final int label_search=0x7f05001c;
+        public static final int menu_settings=0x7f05000c;
+        public static final int msg_location_fail=0x7f050018;
+        public static final int msg_query_fail=0x7f050019;
+        public static final int msg_result_zero=0x7f05001a;
+        public static final int msg_some_location=0x7f05001b;
+        public static final int text_location=0x7f05001d;
     }
     public static final class style {
         /** 
@@ -214,11 +256,11 @@ containing a value of this type.
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f060000;
+        public static final int AppBaseTheme=0x7f090000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f060001;
+        public static final int AppTheme=0x7f090001;
     }
     public static final class styleable {
         /** Attributes that can be used with a MapAttrs.

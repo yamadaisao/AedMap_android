@@ -1,8 +1,14 @@
 package jp.aedmap.android.util;
 
+import jp.aedmap.android.R;
+import jp.aedmap.android.http.MarkerItem;
 import android.content.Context;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
+
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapUtils {
 
@@ -44,6 +50,7 @@ public class MapUtils {
 		wm.getDefaultDisplay().getMetrics(metrics);
 		double widthInPixels = metrics.widthPixels / metrics.density;
 		double metersPerPixel = equatorLength / 256 / metrics.density;
+		// 68 is percent
 		double diameter = (accuracy / 68 * 100) * 2;
 		int zoomLevel = 1;
 		while ((metersPerPixel * widthInPixels) > diameter) {
@@ -51,5 +58,17 @@ public class MapUtils {
 			++zoomLevel;
 		}
 		return zoomLevel;
+	}
+
+	private static BitmapDescriptor ICON_AED = BitmapDescriptorFactory
+			.fromResource(R.drawable.ic_aed);
+
+	public static final MarkerOptions createOptions(MarkerItem item) {
+		MarkerOptions options = new MarkerOptions();
+		options.position(item.position);
+		options.title(item.name);
+		options.snippet(item.adr);
+		options.icon(ICON_AED);
+		return options;
 	}
 }
