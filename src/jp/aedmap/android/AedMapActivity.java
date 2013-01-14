@@ -2,6 +2,9 @@ package jp.aedmap.android;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import jp.aedmap.android.http.AsyncTaskCallback;
 import jp.aedmap.android.http.MarkerItem;
@@ -9,17 +12,16 @@ import jp.aedmap.android.http.MarkerItemResult;
 import jp.aedmap.android.http.MarkerQueryAsyncTask;
 import jp.aedmap.android.util.GeocodeManager;
 import jp.aedmap.android.util.MapUtils;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.location.Address;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -29,54 +31,30 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
+import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 
-public class AedMapActivity extends FragmentActivity {
+public class AedMapActivity extends FragmentActivity implements LocationSource,
+		LocationListener {
 
 	private static final String TAG = AedMapActivity.class.getSimpleName();
+	private static final boolean DEBUG = true;
+	private static final boolean DEBUG_LIFE_CYCLE = false;
+	private static final boolean DEBUG_EVENT = false;
 
-	private static AddressHandler addrhandler;
+	private static MapHandler mapHandler;
 	private GoogleMap mMap;
 	private ProgressBar progress;
+	private LocationManager lm = null;
 
 	private Context ctx;
 	private boolean isFirst = true;
-
-	BroadcastReceiver locationUpdateReceiver = new BroadcastReceiver() {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			String action = intent.getAction();
-			if (action == null) {
-				return;
-			}
-
-			// Location情報を取得
-			Location loc = (Location) intent.getExtras().get(
-					LocationManager.KEY_LOCATION_CHANGED);
-			LatLng latlng = new LatLng(loc.getLatitude(), loc.getLongitude());
-			getMarkers(latlng);
-
-			if (MyLocationSource.ACTION_LOCATION_UPDATE.equals(action)) {
-				if (isFirst) {
-					moveCamera(loc);
-					isFirst = false;
-				}
-			}
-		}
-
-	};
-
-	private void moveCamera(Location loc) {
-		LatLng latlng = new LatLng(loc.getLatitude(), loc.getLongitude());
-		// Cameraの移動
-		float zoomLevel = MapUtils.calculateZoomLevel(ctx, loc.getAccuracy());
-		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, zoomLevel));
-	}
+	private OnLocationChangedListener mListener;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -89,26 +67,40 @@ public class AedMapActivity extends FragmentActivity {
 		progress.setVisibility(View.INVISIBLE);
 		progress.setIndeterminate(true);
 
-		TextView address = (TextView) findViewById(R.id.text_address);
-		addrhandler = new AddressHandler(address);
+		lm = (LocationManager) getSystemService(LOCATION_SERVICE);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		// レシーバの登録
-		final IntentFilter locationIntentFilter = new IntentFilter();
-		locationIntentFilter.addAction(MyLocationSource.ACTION_LOCATION_UPDATE);
-		registerReceiver(locationUpdateReceiver, locationIntentFilter);
+		if (DEBUG_LIFE_CYCLE) {
+			Log.v(TAG, "onResume");
+		}
 
 		setUpMapIfNeeded();
+		for (String providerName : lm.getAllProviders()) {
+			if (lm.isProviderEnabled(providerName)) {
+				lm.requestLocationUpdates(providerName, 0, 0, this);
+				if (DEBUG) {
+					Log.v(TAG, "requestLocationUpdates(" + providerName + ")");
+				}
+			} else {
+				if (DEBUG) {
+					Log.v(TAG, providerName + " is not active.");
+				}
+			}
+		}
+
+		TextView address = (TextView) findViewById(R.id.text_address);
+		mapHandler = new MapHandler(mMap, address);
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		unregisterReceiver(locationUpdateReceiver);
+		if (DEBUG_LIFE_CYCLE) {
+			Log.v(TAG, "onPause");
+		}
 	}
 
 	@Override
@@ -133,33 +125,55 @@ public class AedMapActivity extends FragmentActivity {
 	}
 
 	private void setUpMap() {
-		mMap.setMyLocationEnabled(true);
 		UiSettings uiSetting = mMap.getUiSettings();
 		uiSetting.setAllGesturesEnabled(true);
 		uiSetting.setCompassEnabled(true);
 		uiSetting.setMyLocationButtonEnabled(true);
+		mMap.setMyLocationEnabled(true);
+
 		mMap.setOnCameraChangeListener(new OnCameraChangeListener() {
 
 			@Override
 			public void onCameraChange(CameraPosition position) {
-				SharedData data = SharedData.getInstance();
-				if (data.getLastResult() == null) {
-					data.setLastResult(new MarkerItemResult(position.target));
-				}
+				getMarkers(position.target);
 
-				// 取得済みの矩形範囲を超えた場合に再取得する
+				SharedData data = SharedData.getInstance();
 				MarkerItemResult lastResult = data.getLastResult();
-				if (position.target.latitude < lastResult.minLatitude
-						|| position.target.latitude > lastResult.maxLatitude
-						|| position.target.longitude < lastResult.minLongitude
-						|| position.target.longitude > lastResult.maxLongitude) {
-					getMarkers(position.target);
+				if (position.target.latitude != lastResult.queryLatitude
+						|| position.target.longitude != lastResult.queryLongitude) {
+					getAddress(position.target);
 				}
-				getAddress(position.target);
 			}
 		});
-		mMap.setLocationSource(new MyLocationSource(ctx));
+		mMap.setLocationSource(this);
 	}
+
+	@Override
+	public void onLocationChanged(Location location) {
+		if (DEBUG_EVENT) {
+			Log.v(TAG,
+					"onLocationChanged:" + location.getProvider() + ":lat="
+							+ location.getLatitude() + ",lng="
+							+ location.getLongitude());
+		}
+		if (mListener != null) {
+			mListener.onLocationChanged(location);
+			if (isFirst) {
+				moveCamera(location);
+				isFirst = false;
+			}
+		}
+		getMarkers(new LatLng(location.getLatitude(), location.getLongitude()));
+	}
+
+	private void moveCamera(Location loc) {
+		LatLng latlng = new LatLng(loc.getLatitude(), loc.getLongitude());
+		// Cameraの移動
+		float zoomLevel = MapUtils.calculateZoomLevel(ctx, loc.getAccuracy());
+		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, zoomLevel));
+	}
+
+	private static Map<Long, Marker> markerMap = new HashMap<Long, Marker>();
 
 	/**
 	 * 現在地の緯度経度をパラメータにマーカーを取得します.
@@ -167,37 +181,68 @@ public class AedMapActivity extends FragmentActivity {
 	 * @param geoPoint
 	 *            現在地の緯度経度
 	 */
-	private void getMarkers(LatLng position) {
-		AsyncTaskCallback<MarkerItemResult> callback = new AsyncTaskCallback<MarkerItemResult>() {
+	private void getMarkers(LatLng query) {
 
-			Context ctx = getApplicationContext();
+		SharedData data = SharedData.getInstance();
+		if (data.getLastResult() == null) {
+			data.setLastResult(new MarkerItemResult(query));
+		}
 
-			@Override
-			public void onSuccess(MarkerItemResult result) {
-				SharedData data = SharedData.getInstance();
-				data.setLastResult(result);
-				for (MarkerItem item : result.markers) {
-					Marker marker = mMap
-							.addMarker(MapUtils.createOptions(item));
+		MarkerItemResult lastResult = data.getLastResult();
+		if (query.latitude < lastResult.minLatitude
+				|| query.latitude > lastResult.maxLatitude
+				|| query.longitude < lastResult.minLongitude
+				|| query.longitude > lastResult.maxLongitude) {
+
+			AsyncTaskCallback<MarkerItemResult> callback = new AsyncTaskCallback<MarkerItemResult>() {
+
+				Context ctx = getApplicationContext();
+
+				@Override
+				public void onSuccess(MarkerItemResult result) {
+					SharedData data = SharedData.getInstance();
+					data.setLastResult(result);
+					synchronized (markerMap) {
+						for (MarkerItem item : result.markers) {
+							Marker marker = mMap.addMarker(MapUtils
+									.createOptions(item));
+							if (markerMap.containsKey(item.id)) {
+								// 取得済みのマーカーは置き換える
+								Marker oldMarker = markerMap.get(item.id);
+								oldMarker.remove();
+							}
+							markerMap.put(item.id, marker);
+						}
+					}
+					progress.setVisibility(View.INVISIBLE);
+
+					if (DEBUG) {
+						Log.v(TAG, "result=" + result.markers.size() + ",map="
+								+ markerMap.size());
+					}
+					if (markerMap.size() >= 200) {
+						Message msg = new Message();
+						msg.what = MSG_REMOVE;
+						mapHandler.sendMessage(msg);
+					}
 				}
-				progress.setVisibility(View.INVISIBLE);
-			}
 
-			@Override
-			public void onFailed(int resId, String... args) {
-				Toast.makeText(ctx, resId, Toast.LENGTH_SHORT).show();
-				progress.setVisibility(View.INVISIBLE);
-			}
+				@Override
+				public void onFailed(int resId, String... args) {
+					Toast.makeText(ctx, resId, Toast.LENGTH_SHORT).show();
+					progress.setVisibility(View.INVISIBLE);
+				}
 
-			@Override
-			public void onAppFailed(MarkerItemResult data) {
-				progress.setVisibility(View.INVISIBLE);
-			}
+				@Override
+				public void onAppFailed(MarkerItemResult data) {
+					progress.setVisibility(View.INVISIBLE);
+				}
 
-		};
-		progress.setVisibility(View.VISIBLE);
-		MarkerQueryAsyncTask task = new MarkerQueryAsyncTask(callback);
-		task.execute(position);
+			};
+			progress.setVisibility(View.VISIBLE);
+			MarkerQueryAsyncTask task = new MarkerQueryAsyncTask(callback);
+			task.execute(query);
+		}
 	}
 
 	private static final String CURRENT_ADDRESS = "str_address";
@@ -222,33 +267,110 @@ public class AedMapActivity extends FragmentActivity {
 					strAddress = GeocodeManager.concatAddress(address);
 				} catch (IOException e) {
 					strAddress = getString(R.string.msg_location_fail);
+					Log.e(TAG, e.getMessage());
 				}
 
 				// 住所をメッセージに持たせて
 				// ハンドラにUIを書き換えさせる
 				Message message = new Message();
+				message.what = MSG_ADDRESS;
 				Bundle bundle = new Bundle();
 				bundle.putString(CURRENT_ADDRESS, strAddress);
 				message.setData(bundle);
-				addrhandler.sendMessage(message);
+				mapHandler.sendMessage(message);
 			}
 		};
 		searchAdress.start();
 	}
 
-	static class AddressHandler extends Handler {
+	private static final int MSG_ADDRESS = 1;
+	private static final int MSG_REMOVE = 2;
+
+	static class MapHandler extends Handler {
 
 		private WeakReference<TextView> address_;
+		private WeakReference<GoogleMap> map_;
 
-		public AddressHandler(TextView address) {
+		public MapHandler(GoogleMap map, TextView address) {
 			address_ = new WeakReference<TextView>(address);
+			map_ = new WeakReference<GoogleMap>(map);
 		}
 
 		@Override
 		public void handleMessage(Message msg) {
-			String str_address = msg.getData().get(CURRENT_ADDRESS).toString();
-			TextView address = address_.get();
-			address.setText(str_address);
+			switch (msg.what) {
+			case MSG_ADDRESS: {
+				String str_address = msg.getData().get(CURRENT_ADDRESS)
+						.toString();
+				TextView address = address_.get();
+				address.setText(str_address);
+				break;
+			}
+			case MSG_REMOVE: {
+				GoogleMap map = map_.get();
+				LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+				// Loop through all the items that are available to be placed on
+				// the map
+				synchronized (markerMap) {
+					int initSize = markerMap.size();
+					for (Iterator<Long> i = markerMap.keySet().iterator(); i
+							.hasNext();) {
+						Marker marker = markerMap.get(i.next());
+						// If the item is within the the bounds of the screen
+						if (bounds.contains(marker.getPosition()) == false) {
+							i.remove();
+						}
+					}
+					if (DEBUG) {
+						Log.v(TAG, "markerMap reduced " + initSize + " to "
+								+ markerMap.size());
+					}
+				}
+				break;
+			}
+			default:
+				break;
+			}
+		}
+	}
+
+	// --------------------------------------------------------------------------------
+	// unused methods
+	// --------------------------------------------------------------------------------
+	@Override
+	public void activate(OnLocationChangedListener listener) {
+		mListener = listener;
+		if (DEBUG_LIFE_CYCLE) {
+			Log.d(TAG, "activate");
+		}
+	}
+
+	@Override
+	public void deactivate() {
+		mListener = null;
+		if (DEBUG_LIFE_CYCLE) {
+			Log.d(TAG, "deactivate");
+		}
+	}
+
+	@Override
+	public void onProviderDisabled(String provider) {
+		if (DEBUG_EVENT) {
+			Log.v(TAG, "onProviderDisabled:" + provider);
+		}
+	}
+
+	@Override
+	public void onProviderEnabled(String provider) {
+		if (DEBUG_EVENT) {
+			Log.v(TAG, "onProviderEnabled:" + provider);
+		}
+	}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		if (DEBUG_EVENT) {
+			Log.v(TAG, "onStatusChanged:" + provider);
 		}
 	}
 }

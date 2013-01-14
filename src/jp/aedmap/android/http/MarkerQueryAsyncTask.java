@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.LatLng;
 public class MarkerQueryAsyncTask extends
 		AsyncTask<LatLng, Integer, AsyncTaskResult<MarkerItemResult>> {
 
+	private static final boolean DEBUG = true;
 	private static final String TAG = MarkerQueryAsyncTask.class
 			.getSimpleName();
 	private static final String QUERY_URL = "http://aedm.jp/toxmltest.php";
@@ -146,6 +147,12 @@ public class MarkerQueryAsyncTask extends
 			result.minLongitude += (param[0].longitude - result.minLongitude) / 3;
 			result.maxLatitude -= (result.maxLatitude - param[0].latitude) / 3;
 			result.maxLongitude -= (result.maxLongitude - param[0].longitude) / 3;
+			if (DEBUG) {
+				Log.v(TAG, String.format("q=(%f,%f), bounds(%f,%f)-(%f,%f)",
+						result.queryLatitude, result.queryLongitude,
+						result.minLatitude, result.minLongitude,
+						result.maxLatitude, result.maxLongitude));
+			}
 			return AsyncTaskResult.createNormalResult(result);
 
 		} catch (IllegalStateException e) {

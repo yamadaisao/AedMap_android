@@ -1,56 +1,35 @@
 package jp.aedmap.android;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Date;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.location.Criteria;
+import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.maps.LocationSource;
 
 /**
- * <ol>
- * <li>
- * First of all I check what providers are enabled. Some may be disabled on the
- * device, some may be disabled in application manifest.</li>
- * <li>
- * If any provider is available I start location listeners and timeout timer.
- * It's 20 seconds in my example, may not be enough for GPS so you can enlarge
- * it.</li>
- * <li>
- * If I get update from location listener I use the provided value. I stop
- * listeners and timer.</li>
- * <li>
- * If I don't get any updates and timer elapses I have to use last known values.
- * </li>
- * <li>
- * I grab last known values from available providers and choose the most recent
- * of them.</li>
- * </ol>
  * 
- * @author isao-pc2
+ * @author yamada.isao
  * 
  */
 public class MyLocationSource implements LocationSource {
 
 	private static final boolean DEBUG = true;
 	private static final String TAG = MyLocationSource.class.getSimpleName();
-	public static final String ACTION_LOCATION_UPDATE = "com.android.practice.map.ACTION_LOCATION_UPDATE";
+	public static final String ACTION_LOCATION_UPDATE = "jp.aedmap.android.map.ACTION_LOCATION_UPDATE";
 
-	Timer timer1;
-	LocationManager lm;
-	boolean gpsEnabled = false;
-	boolean networkEnabled = false;
 	Context ctx;
 	OnLocationChangedListener mListener;
-	Location netLoc = null;
-	Location gpsLoc = null;
 
 	public MyLocationSource(Context ctx) {
 		this.ctx = ctx;
@@ -62,197 +41,193 @@ public class MyLocationSource implements LocationSource {
 			Log.v(TAG, "activate");
 		}
 		mListener = listener;
-		netLoc = null;
-		gpsLoc = null;
-		getLocation();
+		LocationManager lm = (LocationManager) ctx
+				.getSystemService(Context.LOCATION_SERVICE);
+
+		registerReceivers(lm);
+		requestLocationUpdates(lm);
+	}
+
+	private void registerReceivers(LocationManager lm) {
+		// GPSのステータス変更はListenerで登録します.
+		lm.addGpsStatusListener(gpsStatusLitener);
+
+		// WI-FIのステータス変更はintentでわかります.
+		final IntentFilter wifiIntentFilter = new IntentFilter();
+		wifiIntentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+		wifiIntentFilter
+				.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+		wifiIntentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+		ctx.registerReceiver(wifiStateUpdateReciever, wifiIntentFilter);
+
+		// LocationProviderの変更
+		final IntentFilter locationIntentFilter = new IntentFilter();
+		locationIntentFilter
+				.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
+		ctx.registerReceiver(locationProviderReceiver, locationIntentFilter);
+
+		if (DEBUG) {
+			Log.v(TAG, "registerReceivers");
+		}
+	}
+
+	private final BroadcastReceiver wifiStateUpdateReciever = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+			if (action == null) {
+				return;
+			}
+			if (DEBUG) {
+				Log.v(TAG, action);
+			}
+		}
+	};
+
+	private final BroadcastReceiver locationProviderReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+			if (action == null) {
+				return;
+			}
+			if (DEBUG) {
+				Log.v(TAG, action);
+			}
+		}
+
+	};
+
+	private Location prevLocation;
+
+	private final LocationListener locationListener = new LocationListener() {
+
+		@Override
+		public void onLocationChanged(Location location) {
+			if (DEBUG) {
+				Log.v(TAG,
+						"onLocationChanged:" + location.getProvider() + ":lat="
+								+ location.getLatitude() + ",lng="
+								+ location.getLongitude());
+			}
+			Intent intent = new Intent(ACTION_LOCATION_UPDATE);
+			intent.putExtra(LocationManager.KEY_LOCATION_CHANGED, location);
+			ctx.sendBroadcast(intent);
+			if (mListener != null) {
+				mListener.onLocationChanged(location);
+			}
+		}
+
+		@Override
+		public void onProviderDisabled(String provider) {
+			if (DEBUG) {
+				Log.v(TAG, "onProviderDisabled:" + provider);
+			}
+		}
+
+		@Override
+		public void onProviderEnabled(String provider) {
+			if (DEBUG) {
+				Log.v(TAG, "onProviderEnabled:" + provider);
+			}
+		}
+
+		@Override
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+			if (DEBUG) {
+				Log.v(TAG, "onStatusChanged:" + provider);
+			}
+		}
+	};
+
+	private final GpsStatus.Listener gpsStatusLitener = new GpsStatus.Listener() {
+		/**
+		 * このメソッドは、プロバイダの場所を取得することができない場合、 または最近使用不能の期間後に利用可能となっている場合に呼び出されます。
+		 */
+		@Override
+		public void onGpsStatusChanged(int event) {
+			// GpsStatus.Listenerで呼ばれる
+			switch (event) {
+			case GpsStatus.GPS_EVENT_STARTED: {
+				Log.v(TAG, "GPS_EVENT_STARTED");
+				break;
+			}
+			case GpsStatus.GPS_EVENT_STOPPED: {
+				Log.v(TAG, "GPS_EVENT_STOPPED");
+				break;
+			}
+			case GpsStatus.GPS_EVENT_FIRST_FIX: {
+				Log.v(TAG, "GPS_EVENT_FIRST_FIX");
+				break;
+			}
+			case GpsStatus.GPS_EVENT_SATELLITE_STATUS: {
+				Log.v(TAG, "GPS_EVENT_SATELLITE_STATUS");
+				break;
+			}
+			}
+		}
+	};
+
+	private void requestLocationUpdates(final LocationManager lm) {
+
+		for (String providerName : lm.getAllProviders()) {
+			if (lm.isProviderEnabled(providerName)) {
+				lm.requestLocationUpdates(providerName, 0, 0, locationListener);
+				if (DEBUG) {
+					Log.v(TAG, "requestLocationUpdates(" + providerName + ")");
+				}
+			} else {
+				if (DEBUG) {
+					Log.v(TAG, providerName + " is not active.");
+				}
+			}
+		}
+		final Criteria criteria = new Criteria();
+		criteria.setBearingRequired(false); // 方位不要
+		criteria.setSpeedRequired(false); // 速度不要
+		criteria.setAltitudeRequired(false); // 高度不要
+		final String provider = lm.getBestProvider(criteria, true);
+		if (provider != null) {
+			final Location lastKnownLocation = lm
+					.getLastKnownLocation(provider);
+			if (DEBUG) {
+				Log.v(TAG,
+						"lastKnownLocation:lat="
+								+ lastKnownLocation.getLatitude() + ",lng="
+								+ lastKnownLocation.getLongitude());
+			}
+			if (lastKnownLocation != null
+					&& (new Date().getTime() - lastKnownLocation.getTime()) <= (5 * 60 * 1000L)) {
+				Intent intent = new Intent(ACTION_LOCATION_UPDATE);
+				intent.putExtra(LocationManager.KEY_LOCATION_CHANGED,
+						lastKnownLocation);
+				ctx.sendBroadcast(intent);
+				if (mListener != null) {
+					mListener.onLocationChanged(lastKnownLocation);
+				}
+			}
+		}
 	}
 
 	@Override
 	public void deactivate() {
+		removeUpdates();
 		if (DEBUG) {
 			Log.v(TAG, "deactivate");
 		}
-		cancelTimer();
+		mListener = null;
 	}
 
-	private boolean getLocation() {
-		// I use LocationResult callback class to pass location value from
-		// MyLocation to user code.
-		if (lm == null) {
-			lm = (LocationManager) ctx
-					.getSystemService(Context.LOCATION_SERVICE);
-		}
+	private void removeUpdates() {
+		LocationManager lm = (LocationManager) ctx
+				.getSystemService(Context.LOCATION_SERVICE);
+		lm.removeUpdates(locationListener);
 
-		// exceptions will be thrown if provider is not permitted.
-		try {
-			gpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-		} catch (Exception ex) {
-		}
-		try {
-			networkEnabled = lm
-					.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-		} catch (Exception ex) {
-		}
-
-		// don't start listeners if no provider is enabled
-		if (!gpsEnabled && !networkEnabled) {
-			if (DEBUG) {
-				Log.v(TAG, "gps and network isn't enabled");
-			}
-			return false;
-		}
-
-		if (gpsEnabled) {
-			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
-					locationListenerGps);
-		}
-		if (networkEnabled) {
-			lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0,
-					locationListenerNetwork);
-		}
-		timer1 = new Timer();
-		timer1.scheduleAtFixedRate(new GetLastLocation(), 0, ctx.getResources()
-				.getInteger(R.integer.scheduleAtFixedRate));
-		return true;
-	}
-
-	private void cancelTimer() {
-		timer1.cancel();
-		lm.removeUpdates(locationListenerGps);
-		lm.removeUpdates(locationListenerNetwork);
-	}
-
-	LocationListener locationListenerGps = new LocationListener() {
-		public void onLocationChanged(Location location) {
-			broadcastMessage(location);
-		}
-
-		public void onProviderDisabled(String provider) {
-			Log.v(TAG, provider + " disabled.");
-			gpsEnabled = false;
-			lm.removeUpdates(this);
-			selectProvider();
-		}
-
-		public void onProviderEnabled(String provider) {
-			Log.v(TAG, provider + " enabled.");
-			gpsEnabled = true;
-			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-			selectProvider();
-		}
-
-		public void onStatusChanged(String provider, int status, Bundle extras) {
-			switch (status) {
-			case LocationProvider.OUT_OF_SERVICE:
-				Log.v(TAG, provider + " is out of service.");
-				break;
-			case LocationProvider.TEMPORARILY_UNAVAILABLE:
-				Log.v(TAG, provider + " is temporarily unavailable.");
-				break;
-			case LocationProvider.AVAILABLE:
-				Log.v(TAG, provider + " is available.");
-				break;
-
-			default:
-				break;
-			}
-			selectProvider();
-		}
-	};
-
-	LocationListener locationListenerNetwork = new LocationListener() {
-		public void onLocationChanged(Location location) {
-			broadcastMessage(location);
-		}
-
-		public void onProviderDisabled(String provider) {
-			Log.v(TAG, provider + " disabled.");
-			gpsEnabled = false;
-			lm.removeUpdates(this);
-			selectProvider();
-		}
-
-		public void onProviderEnabled(String provider) {
-			Log.v(TAG, provider + " enabled.");
-			gpsEnabled = true;
-			lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0,
-					this);
-			selectProvider();
-		}
-
-		public void onStatusChanged(String provider, int status, Bundle extras) {
-			switch (status) {
-			case LocationProvider.OUT_OF_SERVICE:
-				Log.v(TAG, provider + " is out of service.");
-				break;
-			case LocationProvider.TEMPORARILY_UNAVAILABLE:
-				Log.v(TAG, provider + " is temporarily unavailable.");
-				break;
-			case LocationProvider.AVAILABLE:
-				Log.v(TAG, provider + " is available.");
-				break;
-
-			default:
-				break;
-			}
-			selectProvider();
-		}
-	};
-
-	class GetLastLocation extends TimerTask {
-		@Override
-		public void run() {
-			if (gpsEnabled) {
-				gpsLoc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			}
-			if (networkEnabled) {
-				netLoc = lm
-						.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			}
-
-			// if there are both values use the latest one
-			if (gpsLoc != null && netLoc != null) {
-				if (gpsLoc.getTime() > netLoc.getTime()) {
-					broadcastMessage(gpsLoc);
-				} else {
-					broadcastMessage(netLoc);
-				}
-				return;
-			}
-
-			if (gpsEnabled == true && gpsLoc != null) {
-				broadcastMessage(gpsLoc);
-				return;
-			}
-			if (netLoc != null) {
-				broadcastMessage(netLoc);
-				return;
-			}
-			broadcastMessage(null);
-		}
-	}
-
-	private void broadcastMessage(Location loc) {
-		if (loc != null) {
-			timer1.cancel();
-			Intent broadcastIntent = new Intent();
-			broadcastIntent.putExtra(LocationManager.KEY_LOCATION_CHANGED, loc);
-			broadcastIntent.setAction(ACTION_LOCATION_UPDATE);
-			ctx.sendBroadcast(broadcastIntent);
-			mListener.onLocationChanged(loc);
-		}
-	}
-
-	private void selectProvider() {
-		Location location = null;
-		if (gpsEnabled) {
-			location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		} else if (networkEnabled) {
-			location = lm
-					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		}
-		if (location != null) {
-			broadcastMessage(location);
+		ctx.unregisterReceiver(wifiStateUpdateReciever);
+		ctx.unregisterReceiver(locationProviderReceiver);
+		if (DEBUG) {
+			Log.v(TAG, "removeUpdates");
 		}
 	}
 }
