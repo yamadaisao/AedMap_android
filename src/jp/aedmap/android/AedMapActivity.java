@@ -39,13 +39,19 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 
+/**
+ * Main activity of the aed map.
+ * 
+ * @author yamada.isao@gmail.com
+ * 
+ */
 public class AedMapActivity extends FragmentActivity implements LocationSource,
 		LocationListener {
 
 	private static final String TAG = AedMapActivity.class.getSimpleName();
 	private static final boolean DEBUG = true;
 	private static final boolean DEBUG_LIFE_CYCLE = false;
-	private static final boolean DEBUG_EVENT = false;
+	private static final boolean DEBUG_EVENT = true;
 
 	private static MapHandler mapHandler;
 	private GoogleMap mMap;
@@ -135,9 +141,8 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 
 			@Override
 			public void onCameraChange(CameraPosition position) {
-				getMarkers(position.target);
-
 				SharedData data = SharedData.getInstance();
+				getMarkers(position.target.latitude, position.target.longitude);
 				MarkerItemResult lastResult = data.getLastResult();
 				if (position.target.latitude != lastResult.queryLatitude
 						|| position.target.longitude != lastResult.queryLongitude) {
@@ -163,36 +168,27 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 				isFirst = false;
 			}
 		}
-		getMarkers(new LatLng(location.getLatitude(), location.getLongitude()));
-	}
-
-	private void moveCamera(Location loc) {
-		LatLng latlng = new LatLng(loc.getLatitude(), loc.getLongitude());
-		// Cameraの移動
-		float zoomLevel = MapUtils.calculateZoomLevel(ctx, loc.getAccuracy());
-		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, zoomLevel));
+		getMarkers(location.getLatitude(), location.getLongitude());
 	}
 
 	private static Map<Long, Marker> markerMap = new HashMap<Long, Marker>();
 
 	/**
-	 * 現在地の緯度経度をパラメータにマーカーを取得します.
+	 * パラメータの緯度経度をクエリにマーカーを取得します. <br/>
+	 * 移動がの許容範囲以内の場合はマーカーを取得しません.
 	 * 
-	 * @param geoPoint
-	 *            現在地の緯度経度
+	 * @param latitude
+	 *            クエリの緯度
+	 * @param longitude
+	 *            クエリの経度
 	 */
-	private void getMarkers(LatLng query) {
-
+	private void getMarkers(double latitude, double longitude) {
 		SharedData data = SharedData.getInstance();
-		if (data.getLastResult() == null) {
-			data.setLastResult(new MarkerItemResult(query));
-		}
-
 		MarkerItemResult lastResult = data.getLastResult();
-		if (query.latitude < lastResult.minLatitude
-				|| query.latitude > lastResult.maxLatitude
-				|| query.longitude < lastResult.minLongitude
-				|| query.longitude > lastResult.maxLongitude) {
+		if (lastResult == null || latitude < lastResult.minLatitude
+				|| latitude > lastResult.maxLatitude
+				|| longitude < lastResult.minLongitude
+				|| longitude > lastResult.maxLongitude) {
 
 			AsyncTaskCallback<MarkerItemResult> callback = new AsyncTaskCallback<MarkerItemResult>() {
 
@@ -241,8 +237,16 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 			};
 			progress.setVisibility(View.VISIBLE);
 			MarkerQueryAsyncTask task = new MarkerQueryAsyncTask(callback);
-			task.execute(query);
+			task.execute(new LatLng(latitude, longitude));
 		}
+
+	}
+
+	private void moveCamera(Location loc) {
+		LatLng latlng = new LatLng(loc.getLatitude(), loc.getLongitude());
+		// Cameraの移動
+		float zoomLevel = MapUtils.calculateZoomLevel(ctx, loc.getAccuracy());
+		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, zoomLevel));
 	}
 
 	private static final String CURRENT_ADDRESS = "str_address";
