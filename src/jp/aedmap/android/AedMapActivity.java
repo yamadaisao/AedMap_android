@@ -204,15 +204,23 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 					data.setLastResult(result);
 					synchronized (markerMap) {
 						for (MarkerItem item : result.markers) {
-							Marker marker = mMap.addMarker(MapUtils
-									.createOptions(item));
 							if (markerMap.containsKey(item.id)) {
 								// 取得済みのマーカーは置き換える
+								// InfoWindowを表示している場合は置き換えない
 								Marker oldMarker = markerMap.get(item.id);
-								oldMarker.remove();
+								if (oldMarker.isInfoWindowShown() == false) {
+									oldMarker.remove();
+									Marker marker = mMap.addMarker(MapUtils
+											.createOptions(item));
+									markerMap.put(item.id, marker);
+									itemMap.put(marker, item);
+								}
+							} else {
+								Marker marker = mMap.addMarker(MapUtils
+										.createOptions(item));
+								markerMap.put(item.id, marker);
+								itemMap.put(marker, item);
 							}
-							markerMap.put(item.id, marker);
-							itemMap.put(marker, item);
 						}
 					}
 					progress.setVisibility(View.INVISIBLE);
@@ -327,8 +335,10 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 						Marker marker = markerMap.get(i.next());
 						// If the item is within the the bounds of the screen
 						if (bounds.contains(marker.getPosition()) == false) {
-							itemMap.remove(marker);
-							i.remove();
+							if (marker.isInfoWindowShown() == false) {
+								itemMap.remove(marker);
+								i.remove();
+							}
 						}
 					}
 					if (DEBUG) {
