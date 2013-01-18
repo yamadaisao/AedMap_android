@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -144,13 +145,15 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 				SharedData data = SharedData.getInstance();
 				getMarkers(position.target.latitude, position.target.longitude);
 				MarkerItemResult lastResult = data.getLastResult();
-				if (position.target.latitude != lastResult.queryLatitude
-						|| position.target.longitude != lastResult.queryLongitude) {
+				if (position != null
+						&& (lastResult == null
+								|| position.target.latitude != lastResult.queryLatitude || position.target.longitude != lastResult.queryLongitude)) {
 					getAddress(position.target);
 				}
 			}
 		});
 		mMap.setLocationSource(this);
+		mMap.setInfoWindowAdapter(new CustomInfoAdapter());
 	}
 
 	@Override
@@ -172,6 +175,7 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 	}
 
 	private static Map<Long, Marker> markerMap = new HashMap<Long, Marker>();
+	private static Map<Marker, MarkerItem> itemMap = new HashMap<Marker, MarkerItem>();
 
 	/**
 	 * パラメータの緯度経度をクエリにマーカーを取得します. <br/>
@@ -208,6 +212,7 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 								oldMarker.remove();
 							}
 							markerMap.put(item.id, marker);
+							itemMap.put(marker, item);
 						}
 					}
 					progress.setVisibility(View.INVISIBLE);
@@ -292,8 +297,8 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 
 	static class MapHandler extends Handler {
 
-		private WeakReference<TextView> address_;
-		private WeakReference<GoogleMap> map_;
+		private final WeakReference<TextView> address_;
+		private final WeakReference<GoogleMap> map_;
 
 		public MapHandler(GoogleMap map, TextView address) {
 			address_ = new WeakReference<TextView>(address);
@@ -322,12 +327,13 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 						Marker marker = markerMap.get(i.next());
 						// If the item is within the the bounds of the screen
 						if (bounds.contains(marker.getPosition()) == false) {
+							itemMap.remove(marker);
 							i.remove();
 						}
 					}
 					if (DEBUG) {
 						Log.v(TAG, "markerMap reduced " + initSize + " to "
-								+ markerMap.size());
+								+ markerMap.size() + "," + itemMap.size());
 					}
 				}
 				break;
@@ -336,6 +342,80 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 				break;
 			}
 		}
+	}
+
+	/**
+	 * InfoWindow
+	 * 
+	 * @author yamada.isao@gmail.com
+	 * 
+	 */
+	private class CustomInfoAdapter implements InfoWindowAdapter {
+		/** Window の View. */
+		// private final View mWindow;
+		// private final TextView name;
+		// private final TextView adr;
+		// private final TextView able;
+		// private final TextView src;
+		// private final TextView spl;
+
+		public CustomInfoAdapter() {
+			// mWindow = getLayoutInflater().inflate(R.layout.aed_info_window,
+			// null);
+			//
+			// name = (TextView) mWindow.findViewById(R.id.name);
+			// adr = (TextView) mWindow.findViewById(R.id.adr);
+			// able = (TextView) mWindow.findViewById(R.id.able);
+			// src = (TextView) mWindow.findViewById(R.id.src);
+			// spl = (TextView) mWindow.findViewById(R.id.spl);
+		}
+
+		@Override
+		public View getInfoContents(Marker marker) {
+			return null;
+		}
+
+		@Override
+		public View getInfoWindow(Marker marker) {
+			View mWindow = getLayoutInflater().inflate(
+					R.layout.aed_info_window, null);
+
+			TextView name = (TextView) mWindow.findViewById(R.id.name);
+			TextView adr = (TextView) mWindow.findViewById(R.id.adr);
+			TextView able = (TextView) mWindow.findViewById(R.id.able);
+			TextView src = (TextView) mWindow.findViewById(R.id.src);
+			TextView spl = (TextView) mWindow.findViewById(R.id.spl);
+
+			MarkerItem item = itemMap.get(marker);
+			name.setText(item.name);
+			if (item.adr != null && "".equals(item.adr.trim()) == false) {
+				adr.setText(item.adr);
+				adr.setVisibility(View.VISIBLE);
+			} else {
+				adr.setVisibility(View.GONE);
+			}
+			if (item.able != null && "".equals(item.able.trim()) == false) {
+				able.setText(item.able);
+				able.setVisibility(View.VISIBLE);
+			} else {
+				able.setVisibility(View.GONE);
+			}
+			if (item.src != null && "".equals(item.src.trim()) == false) {
+				src.setText(item.src);
+				src.setVisibility(View.VISIBLE);
+			} else {
+				src.setVisibility(View.GONE);
+			}
+			if (item.spl != null && "".equals(item.spl.trim()) == false) {
+				spl.setText(item.spl);
+				spl.setVisibility(View.VISIBLE);
+			} else {
+				spl.setVisibility(View.GONE);
+			}
+			// mWindow.invalidate();
+			return mWindow;
+		}
+
 	}
 
 	// --------------------------------------------------------------------------------
