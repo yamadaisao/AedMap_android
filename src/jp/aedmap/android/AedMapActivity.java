@@ -352,22 +352,22 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 	 */
 	private class CustomInfoAdapter implements InfoWindowAdapter {
 		/** Window の View. */
-		// private final View mWindow;
-		// private final TextView name;
-		// private final TextView adr;
-		// private final TextView able;
-		// private final TextView src;
-		// private final TextView spl;
+		private final View mWindow;
+		private final TextView name;
+		private final TextView adr;
+		private final TextView able;
+		private final TextView src;
+		private final TextView spl;
 
 		public CustomInfoAdapter() {
-			// mWindow = getLayoutInflater().inflate(R.layout.aed_info_window,
-			// null);
-			//
-			// name = (TextView) mWindow.findViewById(R.id.name);
-			// adr = (TextView) mWindow.findViewById(R.id.adr);
-			// able = (TextView) mWindow.findViewById(R.id.able);
-			// src = (TextView) mWindow.findViewById(R.id.src);
-			// spl = (TextView) mWindow.findViewById(R.id.spl);
+			mWindow = getLayoutInflater().inflate(R.layout.aed_info_window,
+					null);
+
+			name = (TextView) mWindow.findViewById(R.id.name);
+			adr = (TextView) mWindow.findViewById(R.id.adr);
+			able = (TextView) mWindow.findViewById(R.id.able);
+			src = (TextView) mWindow.findViewById(R.id.src);
+			spl = (TextView) mWindow.findViewById(R.id.spl);
 		}
 
 		@Override
@@ -377,15 +377,6 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 
 		@Override
 		public View getInfoWindow(Marker marker) {
-			View mWindow = getLayoutInflater().inflate(
-					R.layout.aed_info_window, null);
-
-			TextView name = (TextView) mWindow.findViewById(R.id.name);
-			TextView adr = (TextView) mWindow.findViewById(R.id.adr);
-			TextView able = (TextView) mWindow.findViewById(R.id.able);
-			TextView src = (TextView) mWindow.findViewById(R.id.src);
-			TextView spl = (TextView) mWindow.findViewById(R.id.spl);
-
 			MarkerItem item = itemMap.get(marker);
 			name.setText(item.name);
 			if (item.adr != null && "".equals(item.adr.trim()) == false) {
@@ -412,10 +403,8 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 			} else {
 				spl.setVisibility(View.GONE);
 			}
-			// mWindow.invalidate();
 			return mWindow;
 		}
-
 	}
 
 	// --------------------------------------------------------------------------------

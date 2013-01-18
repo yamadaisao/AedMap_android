@@ -137,7 +137,7 @@ containing a value of this type.
         public static final int yellow=0x7f060005;
     }
     public static final class dimen {
-        public static final int info_padding=0x7f070001;
+        public static final int info_margin=0x7f070001;
         public static final int info_sub_margin=0x7f070002;
         public static final int progress_margin_bottom=0x7f070000;
     }
@@ -260,11 +260,19 @@ containing a value of this type.
 
 
 
+
+
+
+
     
 
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
             backward-compatibility can go here.
+
+
+
+
 
 
 

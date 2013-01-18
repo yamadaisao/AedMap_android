@@ -19,7 +19,7 @@ int color silver 0x7f060004
 int color white 0x7f060001
 int color white_half 0x7f060002
 int color yellow 0x7f060005
-int dimen info_padding 0x7f070001
+int dimen info_margin 0x7f070001
 int dimen info_sub_margin 0x7f070002
 int dimen progress_margin_bottom 0x7f070000
 int drawable address_border 0x7f020000
