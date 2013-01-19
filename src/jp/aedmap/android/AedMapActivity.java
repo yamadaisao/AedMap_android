@@ -13,6 +13,7 @@ import jp.aedmap.android.http.MarkerQueryAsyncTask;
 import jp.aedmap.android.util.GeocodeManager;
 import jp.aedmap.android.util.MapUtils;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Address;
 import android.location.Location;
 import android.location.LocationListener;
@@ -24,6 +25,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +34,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
+import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
@@ -57,6 +60,7 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 	private static MapHandler mapHandler;
 	private GoogleMap mMap;
 	private ProgressBar progress;
+	private ImageView icList;
 	private LocationManager lm = null;
 
 	private Context ctx;
@@ -74,6 +78,19 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 		progress.setVisibility(View.INVISIBLE);
 		progress.setIndeterminate(true);
 
+		icList = (ImageView) findViewById(R.id.ic_list);
+		icList.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// Toast.makeText(ctx, "pushed", Toast.LENGTH_SHORT).show();
+				Intent intent = new Intent(ctx, AedListActivity.class);
+				intent.putExtra(AedListActivity.ARG_CURRENT,
+						mMap.getCameraPosition().target);
+				startActivity(intent);
+			}
+		});
+
 		lm = (LocationManager) getSystemService(LOCATION_SERVICE);
 	}
 
@@ -82,6 +99,7 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 		super.onResume();
 		if (DEBUG_LIFE_CYCLE) {
 			Log.v(TAG, "onResume");
+
 		}
 
 		setUpMapIfNeeded();
@@ -154,6 +172,14 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 		});
 		mMap.setLocationSource(this);
 		mMap.setInfoWindowAdapter(new CustomInfoAdapter());
+		mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+
+			@Override
+			public void onInfoWindowClick(Marker marker) {
+				Toast.makeText(ctx, "InfoWindow.clicked", Toast.LENGTH_SHORT)
+						.show();
+			}
+		});
 	}
 
 	@Override

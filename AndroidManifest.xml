@@ -49,13 +49,15 @@
             android:value="AIzaSyCLms4LdflgKZ6Ab0h88mGZj_ncQAjzMiU" />
 
         <activity
-            android:name="jp.aedmap.android.AedMapActivity"
+            android:name=".AedMapActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".AedListActivity" >
         </activity>
     </application>
 

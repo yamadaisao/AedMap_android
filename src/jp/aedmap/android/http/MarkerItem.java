@@ -41,13 +41,10 @@ public class MarkerItem implements Parcelable {
 	/** 中心からの距離(m) */
 	public Long dist = 0L;
 
+	public boolean isClickable = false;
+
 	/** アイコンの種類 */
 	public int type;
-
-	/** 編集balloon との受け渡し用. */
-	public String editTitle;
-	/** 編集balloon との受け渡し用. */
-	public String editSnippet;
 
 	/**
 	 * コンストラクタ
