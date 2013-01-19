@@ -13,7 +13,7 @@
     <!-- Copied from Google Maps Library/AndroidManifest.xml. -->
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="16" />
+        android:targetSdkVersion="17" />
     <!-- Google Maps -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
