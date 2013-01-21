@@ -8,6 +8,12 @@
 package jp.aedmap.android;
 
 public final class R {
+    public static final class anim {
+        public static final int activity_close_enter=0x7f040000;
+        public static final int activity_close_exit=0x7f040001;
+        public static final int activity_open_enter=0x7f040002;
+        public static final int activity_open_exit=0x7f040003;
+    }
     public static final class attr {
         /** <p>Must be a floating point value, such as "<code>1.2</code>".
 <p>This may also be a reference to a resource (in the form
@@ -128,22 +134,22 @@ containing a value of this type.
         public static final int zOrderOnTop=0x7f01000d;
     }
     public static final class color {
-        public static final int cyan=0x7f060003;
-        public static final int cyan_half=0x7f060005;
-        public static final int cyan_light=0x7f060004;
-        public static final int dimgrey_half=0x7f060000;
-        public static final int red=0x7f060008;
-        public static final int silver=0x7f060006;
-        public static final int white=0x7f060001;
-        public static final int white_half=0x7f060002;
-        public static final int yellow=0x7f060007;
+        public static final int cyan=0x7f070003;
+        public static final int cyan_half=0x7f070005;
+        public static final int cyan_light=0x7f070004;
+        public static final int dimgrey_half=0x7f070000;
+        public static final int red=0x7f070008;
+        public static final int silver=0x7f070006;
+        public static final int white=0x7f070001;
+        public static final int white_half=0x7f070002;
+        public static final int yellow=0x7f070007;
     }
     public static final class dimen {
-        public static final int info_margin=0x7f070001;
-        public static final int info_sub_margin=0x7f070002;
-        public static final int list_row_padding=0x7f070003;
-        public static final int list_row_padding_side=0x7f070004;
-        public static final int progress_margin_bottom=0x7f070000;
+        public static final int info_margin=0x7f080001;
+        public static final int info_sub_margin=0x7f080002;
+        public static final int list_row_padding=0x7f080003;
+        public static final int list_row_padding_side=0x7f080004;
+        public static final int progress_margin_bottom=0x7f080000;
     }
     public static final class drawable {
         public static final int address_border=0x7f020000;
@@ -158,36 +164,38 @@ containing a value of this type.
         public static final int icon_background_pressed=0x7f020009;
     }
     public static final class id {
-        public static final int LinearLayout1=0x7f040005;
-        public static final int able=0x7f040010;
-        public static final int adr=0x7f04000f;
-        public static final int aed_list_view=0x7f040019;
-        public static final int center=0x7f040008;
-        public static final int fragment_container=0x7f040004;
-        public static final int frame=0x7f040006;
-        public static final int ic_list=0x7f04000a;
-        public static final int map=0x7f040007;
-        public static final int menu_settings=0x7f04001a;
-        public static final int name=0x7f04000e;
-        public static final int none=0x7f040000;
-        public static final int normal=0x7f040001;
-        public static final int progress=0x7f040009;
-        public static final int row_able=0x7f040016;
-        public static final int row_adr=0x7f040014;
-        public static final int row_dist=0x7f040015;
-        public static final int row_name=0x7f040013;
-        public static final int row_spl=0x7f040018;
-        public static final int row_src=0x7f040017;
-        public static final int satellite=0x7f040002;
-        public static final int search_address=0x7f04000d;
-        public static final int spl=0x7f040012;
-        public static final int src=0x7f040011;
-        public static final int terrain=0x7f040003;
-        public static final int textView1=0x7f04000b;
-        public static final int text_address=0x7f04000c;
+        public static final int LinearLayout1=0x7f050005;
+        public static final int able=0x7f050010;
+        public static final int adr=0x7f05000f;
+        public static final int aed_list_view=0x7f050019;
+        public static final int center=0x7f050008;
+        public static final int empty_text=0x7f05001b;
+        public static final int empty_view=0x7f05001a;
+        public static final int fragment_container=0x7f050004;
+        public static final int frame=0x7f050006;
+        public static final int ic_list=0x7f05000a;
+        public static final int map=0x7f050007;
+        public static final int menu_settings=0x7f05001c;
+        public static final int name=0x7f05000e;
+        public static final int none=0x7f050000;
+        public static final int normal=0x7f050001;
+        public static final int progress=0x7f050009;
+        public static final int row_able=0x7f050016;
+        public static final int row_adr=0x7f050014;
+        public static final int row_dist=0x7f050015;
+        public static final int row_name=0x7f050013;
+        public static final int row_spl=0x7f050018;
+        public static final int row_src=0x7f050017;
+        public static final int satellite=0x7f050002;
+        public static final int search_address=0x7f05000d;
+        public static final int spl=0x7f050012;
+        public static final int src=0x7f050011;
+        public static final int terrain=0x7f050003;
+        public static final int textView1=0x7f05000b;
+        public static final int text_address=0x7f05000c;
     }
     public static final class integer {
-        public static final int scheduleAtFixedRate=0x7f080000;
+        public static final int scheduleAtFixedRate=0x7f090000;
     }
     public static final class layout {
         public static final int activity_aed_list=0x7f030000;
@@ -197,112 +205,91 @@ containing a value of this type.
         public static final int fragment_aed_list=0x7f030004;
     }
     public static final class menu {
-        public static final int activity_aed_map=0x7f0a0000;
+        public static final int activity_aed_map=0x7f0b0000;
     }
     public static final class string {
-        public static final int app_name=0x7f05000b;
+        public static final int app_name=0x7f06000b;
         /**  Button in confirmation dialog to enable Google Play services.  Clicking it
         will direct user to application settings of Google Play services where they
         can enable it [CHAR LIMIT=30] 
          */
-        public static final int common_google_play_services_enable_button=0x7f050006;
+        public static final int common_google_play_services_enable_button=0x7f060006;
         /**  Message in confirmation dialog informing user they need to enable
         Google Play services in application settings [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_enable_text=0x7f050005;
+        public static final int common_google_play_services_enable_text=0x7f060005;
         /**  Title of confirmation dialog informing user they need to enable
         Google Play services in application settings [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_enable_title=0x7f050004;
+        public static final int common_google_play_services_enable_title=0x7f060004;
         /**  Button in confirmation dialog for installing Google Play services [CHAR LIMIT=30] 
          */
-        public static final int common_google_play_services_install_button=0x7f050003;
+        public static final int common_google_play_services_install_button=0x7f060003;
         /**  (For phones) Message in confirmation dialog informing user that
         they need to install Google Play services (from Play Store) [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_install_text_phone=0x7f050001;
+        public static final int common_google_play_services_install_text_phone=0x7f060001;
         /**  (For tablets) Message in confirmation dialog informing user that
         they need to install Google Play services (from Play Store) [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_install_text_tablet=0x7f050002;
+        public static final int common_google_play_services_install_text_tablet=0x7f060002;
         /**  Title of confirmation dialog informing user that they need to install
         Google Play services (from Play Store) [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_install_title=0x7f050000;
+        public static final int common_google_play_services_install_title=0x7f060000;
         /**  Message in confirmation dialog informing user there is an unknow issue in Google Player
         services [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_unknown_issue=0x7f050009;
+        public static final int common_google_play_services_unknown_issue=0x7f060009;
         /**  Button in confirmation dialog for updating Google Play services [CHAR LIMIT=20] 
          */
-        public static final int common_google_play_services_update_button=0x7f05000a;
+        public static final int common_google_play_services_update_button=0x7f06000a;
         /**  Message in confirmation dialog informing user that they need to update
         Google Play services (from Play Store) [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_update_text=0x7f050008;
+        public static final int common_google_play_services_update_text=0x7f060008;
         /**  Title of confirmation dialog informing user that they need to update
         Google Play services (from Play Store) [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_update_title=0x7f050007;
-        public static final int http_illegal_state=0x7f050012;
-        public static final int http_io_error=0x7f050014;
-        public static final int http_network_error=0x7f050010;
-        public static final int http_parameter_error=0x7f050015;
-        public static final int http_parse_error=0x7f050013;
-        public static final int http_server_error=0x7f05000d;
-        public static final int http_syntax_error=0x7f05000e;
-        public static final int http_unknown_host=0x7f05000f;
-        public static final int http_unkown_error=0x7f050011;
-        public static final int img_center_cross=0x7f050016;
-        public static final int label_able=0x7f050020;
-        public static final int label_adr=0x7f05001f;
-        public static final int label_dist=0x7f050023;
-        public static final int label_list=0x7f050024;
-        public static final int label_location=0x7f050017;
-        public static final int label_name=0x7f05001e;
-        public static final int label_search=0x7f05001c;
-        public static final int label_spl=0x7f050022;
-        public static final int label_src=0x7f050021;
-        public static final int menu_settings=0x7f05000c;
-        public static final int msg_location_fail=0x7f050018;
-        public static final int msg_query_fail=0x7f050019;
-        public static final int msg_result_zero=0x7f05001a;
-        public static final int msg_some_location=0x7f05001b;
-        public static final int text_location=0x7f05001d;
+        public static final int common_google_play_services_update_title=0x7f060007;
+        public static final int http_illegal_state=0x7f060012;
+        public static final int http_io_error=0x7f060014;
+        public static final int http_network_error=0x7f060010;
+        public static final int http_parameter_error=0x7f060015;
+        public static final int http_parse_error=0x7f060013;
+        public static final int http_server_error=0x7f06000d;
+        public static final int http_syntax_error=0x7f06000e;
+        public static final int http_unknown_host=0x7f06000f;
+        public static final int http_unkown_error=0x7f060011;
+        public static final int img_center_cross=0x7f060016;
+        public static final int label_able=0x7f060020;
+        public static final int label_adr=0x7f06001f;
+        public static final int label_dist=0x7f060023;
+        public static final int label_empty=0x7f060025;
+        public static final int label_list=0x7f060024;
+        public static final int label_location=0x7f060017;
+        public static final int label_name=0x7f06001e;
+        public static final int label_search=0x7f06001c;
+        public static final int label_spl=0x7f060022;
+        public static final int label_src=0x7f060021;
+        public static final int menu_settings=0x7f06000c;
+        public static final int msg_location_fail=0x7f060018;
+        public static final int msg_query_fail=0x7f060019;
+        public static final int msg_result_zero=0x7f06001a;
+        public static final int msg_some_location=0x7f06001b;
+        public static final int text_location=0x7f06001d;
     }
     public static final class style {
+        public static final int Animation=0x7f0a0002;
+        public static final int Animation_Activity=0x7f0a0003;
         /** 
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-
-
-
-
-
-
-
-
-
-
-
-
     
 
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
             backward-compatibility can go here.
-
-
-
-
-
-
-
-
-
-
-
-
         
 
         Base application theme for API 11+. This theme completely replaces
@@ -316,15 +303,14 @@ containing a value of this type.
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f090000;
+        public static final int AppBaseTheme=0x7f0a0000;
         /**  Application theme. 
- All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f090001;
-        public static final int IconStyle=0x7f090004;
-        public static final int InfoWindowStyle=0x7f090002;
-        public static final int InfoWindowSubStyle=0x7f090003;
-        public static final int ListRowStyle=0x7f090005;
+        public static final int AppTheme=0x7f0a0001;
+        public static final int IconStyle=0x7f0a0006;
+        public static final int InfoWindowStyle=0x7f0a0004;
+        public static final int InfoWindowSubStyle=0x7f0a0005;
+        public static final int ListRowStyle=0x7f0a0007;
     }
     public static final class styleable {
         /** Attributes that can be used with a MapAttrs.
