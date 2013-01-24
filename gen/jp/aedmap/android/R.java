@@ -15,6 +15,14 @@ public final class R {
         public static final int activity_open_exit=0x7f040003;
     }
     public static final class attr {
+        /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+         */
+        public static final int buttonBarButtonStyle=0x7f01000f;
+        /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+         */
+        public static final int buttonBarStyle=0x7f01000e;
         /** <p>Must be a floating point value, such as "<code>1.2</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -134,6 +142,7 @@ containing a value of this type.
         public static final int zOrderOnTop=0x7f01000d;
     }
     public static final class color {
+        public static final int black_overlay=0x7f070009;
         public static final int cyan=0x7f070003;
         public static final int cyan_half=0x7f070005;
         public static final int cyan_light=0x7f070004;
@@ -153,56 +162,64 @@ containing a value of this type.
     }
     public static final class drawable {
         public static final int address_border=0x7f020000;
-        public static final int custom_info_bubble=0x7f020001;
-        public static final int ic_aed=0x7f020002;
-        public static final int ic_center_cross=0x7f020003;
-        public static final int ic_launcher=0x7f020004;
-        public static final int ic_search=0x7f020005;
-        public static final int icon_background=0x7f020006;
-        public static final int icon_background_default=0x7f020007;
-        public static final int icon_background_focused=0x7f020008;
-        public static final int icon_background_pressed=0x7f020009;
+        public static final int button_divider=0x7f020001;
+        public static final int custom_info_bubble=0x7f020002;
+        public static final int ic_aed=0x7f020003;
+        public static final int ic_center_cross=0x7f020004;
+        public static final int ic_launcher=0x7f020005;
+        public static final int ic_search=0x7f020006;
+        public static final int icon_background=0x7f020007;
+        public static final int icon_background_default=0x7f020008;
+        public static final int icon_background_focused=0x7f020009;
+        public static final int icon_background_pressed=0x7f02000a;
     }
     public static final class id {
-        public static final int LinearLayout1=0x7f050005;
-        public static final int able=0x7f050010;
-        public static final int adr=0x7f05000f;
-        public static final int aed_list_view=0x7f050019;
-        public static final int center=0x7f050008;
-        public static final int empty_text=0x7f05001b;
-        public static final int empty_view=0x7f05001a;
-        public static final int fragment_container=0x7f050004;
-        public static final int frame=0x7f050006;
-        public static final int ic_list=0x7f05000a;
-        public static final int map=0x7f050007;
-        public static final int menu_settings=0x7f05001c;
-        public static final int name=0x7f05000e;
+        public static final int LinearLayout1=0x7f050019;
+        public static final int able=0x7f050015;
+        public static final int adr=0x7f050014;
+        public static final int aed_list_view=0x7f05001f;
+        public static final int center=0x7f05000a;
+        public static final int dummy_button=0x7f050006;
+        public static final int empty_text=0x7f050021;
+        public static final int empty_view=0x7f050020;
+        public static final int fragment_container=0x7f050007;
+        public static final int frame=0x7f050008;
+        public static final int fullscreen_content=0x7f050004;
+        public static final int fullscreen_content_controls=0x7f050005;
+        public static final int ic_list=0x7f05000c;
+        public static final int map=0x7f050009;
+        public static final int menu_settings=0x7f050022;
+        public static final int name=0x7f050013;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
-        public static final int progress=0x7f050009;
-        public static final int row_able=0x7f050016;
-        public static final int row_adr=0x7f050014;
-        public static final int row_dist=0x7f050015;
-        public static final int row_name=0x7f050013;
-        public static final int row_spl=0x7f050018;
-        public static final int row_src=0x7f050017;
+        public static final int progress=0x7f05000b;
+        public static final int row_able=0x7f05001c;
+        public static final int row_adr=0x7f05001a;
+        public static final int row_dist=0x7f05001b;
+        public static final int row_name=0x7f050018;
+        public static final int row_spl=0x7f05001e;
+        public static final int row_src=0x7f05001d;
         public static final int satellite=0x7f050002;
-        public static final int search_address=0x7f05000d;
-        public static final int spl=0x7f050012;
-        public static final int src=0x7f050011;
+        public static final int search_address=0x7f05000f;
+        public static final int spl=0x7f050017;
+        public static final int src=0x7f050016;
         public static final int terrain=0x7f050003;
-        public static final int textView1=0x7f05000b;
-        public static final int text_address=0x7f05000c;
+        public static final int textView1=0x7f05000d;
+        public static final int textView2=0x7f050010;
+        public static final int textView3=0x7f050012;
+        public static final int textView4=0x7f050011;
+        public static final int text_address=0x7f05000e;
     }
     public static final class integer {
         public static final int scheduleAtFixedRate=0x7f090000;
     }
     public static final class layout {
-        public static final int activity_aed_list=0x7f030000;
-        public static final int activity_aed_map=0x7f030001;
-        public static final int aed_info_window=0x7f030002;
-        public static final int aed_list_row=0x7f030003;
-        public static final int fragment_aed_list=0x7f030004;
+        public static final int activity_aed_detail=0x7f030000;
+        public static final int activity_aed_list=0x7f030001;
+        public static final int activity_aed_map=0x7f030002;
+        public static final int aed_info_window=0x7f030003;
+        public static final int aed_list_row=0x7f030004;
+        public static final int fragment_aed_list=0x7f030005;
     }
     public static final class menu {
         public static final int activity_aed_map=0x7f0b0000;
@@ -252,6 +269,8 @@ containing a value of this type.
         Google Play services (from Play Store) [CHAR LIMIT=40] 
          */
         public static final int common_google_play_services_update_title=0x7f060007;
+        public static final int dummy_button=0x7f060027;
+        public static final int dummy_content=0x7f060026;
         public static final int http_illegal_state=0x7f060012;
         public static final int http_io_error=0x7f060014;
         public static final int http_network_error=0x7f060010;
@@ -264,7 +283,10 @@ containing a value of this type.
         public static final int img_center_cross=0x7f060016;
         public static final int label_able=0x7f060020;
         public static final int label_adr=0x7f06001f;
+        public static final int label_book=0x7f06002b;
         public static final int label_dist=0x7f060023;
+        public static final int label_edit=0x7f060029;
+        public static final int label_emergency_call=0x7f06002a;
         public static final int label_empty=0x7f060025;
         public static final int label_list=0x7f060024;
         public static final int label_location=0x7f060017;
@@ -278,6 +300,7 @@ containing a value of this type.
         public static final int msg_result_zero=0x7f06001a;
         public static final int msg_some_location=0x7f06001b;
         public static final int text_location=0x7f06001d;
+        public static final int title_activity_aed_detail=0x7f060028;
     }
     public static final class style {
         public static final int Animation=0x7f0a0002;
@@ -285,15 +308,18 @@ containing a value of this type.
         /** 
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+
     
 
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
             backward-compatibility can go here.
+
         
 
         Base application theme for API 11+. This theme completely replaces
         AppBaseTheme from res/values/styles.xml on API 11+ devices.
+
     
  API 11 theme customizations can go here. 
 
@@ -307,12 +333,56 @@ containing a value of this type.
         /**  Application theme. 
          */
         public static final int AppTheme=0x7f0a0001;
+        public static final int ButtonBar=0x7f0a0009;
+        public static final int ButtonBarButton=0x7f0a0008;
+        public static final int FullscreenActionBarStyle=0x7f0a000a;
+        public static final int FullscreenTheme=0x7f0a000b;
         public static final int IconStyle=0x7f0a0006;
         public static final int InfoWindowStyle=0x7f0a0004;
         public static final int InfoWindowSubStyle=0x7f0a0005;
         public static final int ListRowStyle=0x7f0a0007;
     }
     public static final class styleable {
+        /** 
+         Declare custom theme attributes that allow changing which styles are
+         used for button bars depending on the API level.
+         ?android:attr/buttonBarStyle is new as of API 11 so this is
+         necessary to support previous API levels.
+    
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #ButtonBarContainerTheme_buttonBarButtonStyle jp.aedmap.android:buttonBarButtonStyle}</code></td><td></td></tr>
+           <tr><td><code>{@link #ButtonBarContainerTheme_buttonBarStyle jp.aedmap.android:buttonBarStyle}</code></td><td></td></tr>
+           </table>
+           @see #ButtonBarContainerTheme_buttonBarButtonStyle
+           @see #ButtonBarContainerTheme_buttonBarStyle
+         */
+        public static final int[] ButtonBarContainerTheme = {
+            0x7f01000e, 0x7f01000f
+        };
+        /**
+          <p>This symbol is the offset where the {@link jp.aedmap.android.R.attr#buttonBarButtonStyle}
+          attribute's value can be found in the {@link #ButtonBarContainerTheme} array.
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+          @attr name android:buttonBarButtonStyle
+        */
+        public static final int ButtonBarContainerTheme_buttonBarButtonStyle = 1;
+        /**
+          <p>This symbol is the offset where the {@link jp.aedmap.android.R.attr#buttonBarStyle}
+          attribute's value can be found in the {@link #ButtonBarContainerTheme} array.
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+          @attr name android:buttonBarStyle
+        */
+        public static final int ButtonBarContainerTheme_buttonBarStyle = 0;
         /** Attributes that can be used with a MapAttrs.
            <p>Includes the following attributes:</p>
            <table>

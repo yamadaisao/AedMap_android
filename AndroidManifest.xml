@@ -49,7 +49,7 @@
             android:value="AIzaSyCLms4LdflgKZ6Ab0h88mGZj_ncQAjzMiU" />
 
         <activity
-            android:name=".AedMapActivity"
+            android:name="jp.aedmap.android.AedMapActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -57,7 +57,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AedListActivity" >
+        <activity android:name="jp.aedmap.android.AedListActivity" >
+        </activity>
+        <activity
+            android:name="jp.aedmap.android.AedDetailActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_aed_detail" >
         </activity>
     </application>
 
