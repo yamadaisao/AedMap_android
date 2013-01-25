@@ -2,12 +2,12 @@ package jp.aedmap.android;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.android.gms.maps.model.LatLng;
 
-public class AedListActivity extends FragmentActivity {
+public class AedListActivity extends SherlockFragmentActivity {
 	@SuppressWarnings("unused")
 	private static final String TAG = AedListActivity.class.getSimpleName();
 	@SuppressWarnings("unused")

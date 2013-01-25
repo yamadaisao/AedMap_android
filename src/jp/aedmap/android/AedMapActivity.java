@@ -12,7 +12,6 @@ import jp.aedmap.android.http.MarkerItemResult;
 import jp.aedmap.android.http.MarkerQueryAsyncTask;
 import jp.aedmap.android.util.GeocodeManager;
 import jp.aedmap.android.util.MapUtils;
-import jp.aedmap.android.util.SystemUiHider;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
@@ -22,15 +21,14 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
@@ -50,41 +48,13 @@ import com.google.android.gms.maps.model.Marker;
  * @author yamada.isao@gmail.com
  * 
  */
-public class AedMapActivity extends FragmentActivity implements LocationSource,
-		LocationListener {
+public class AedMapActivity extends SherlockFragmentActivity implements
+		LocationSource, LocationListener {
 
 	private static final String TAG = AedMapActivity.class.getSimpleName();
 	private static final boolean DEBUG = true;
 	private static final boolean DEBUG_LIFE_CYCLE = false;
 	private static final boolean DEBUG_EVENT = true;
-
-	/**
-	 * Whether or not the system UI should be auto-hidden after
-	 * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-	 */
-	private static final boolean AUTO_HIDE = true;
-
-	/**
-	 * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-	 * user interaction before hiding the system UI.
-	 */
-	private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-	/**
-	 * If set, will toggle the system UI visibility upon interaction. Otherwise,
-	 * will show the system UI visibility upon interaction.
-	 */
-	private static final boolean TOGGLE_ON_CLICK = true;
-
-	/**
-	 * The flags to pass to {@link SystemUiHider#getInstance}.
-	 */
-	private static final int HIDER_FLAGS = SystemUiHider.FLAG_HIDE_NAVIGATION;
-
-	// /**
-	// * The instance of the {@link SystemUiHider} for this activity.
-	// */
-	// private SystemUiHider mSystemUiHider;
 
 	private static MapHandler mapHandler;
 	private GoogleMap mMap;
@@ -107,89 +77,18 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 		progress.setVisibility(View.INVISIBLE);
 		progress.setIndeterminate(true);
 
+		// リストアイコン
 		icList = (ImageView) findViewById(R.id.ic_list);
 		icList.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				// Toast.makeText(ctx, "pushed", Toast.LENGTH_SHORT).show();
 				Intent intent = new Intent(ctx, AedListActivity.class);
 				intent.putExtra(AedListActivity.ARG_CURRENT,
 						mMap.getCameraPosition().target);
 				startActivity(intent);
 			}
 		});
-
-		final View controlsView = findViewById(R.id.fullscreen_content_controls);
-		final View contentView = findViewById(R.id.fullscreen_content);
-
-		// Set up an instance of SystemUiHider to control the system UI for
-		// this activity.
-		// mSystemUiHider = SystemUiHider.getInstance(this, contentView,
-		// HIDER_FLAGS);
-		// mSystemUiHider = SystemUiHider.getInstance(this, contentView,
-		// SystemUiHider.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES);
-		// mSystemUiHider.setup();
-		// mSystemUiHider
-		// .setOnVisibilityChangeListener(new
-		// SystemUiHider.OnVisibilityChangeListener() {
-		// // Cached values.
-		// int mControlsHeight;
-		// int mShortAnimTime;
-		//
-		// @Override
-		// @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-		// public void onVisibilityChange(boolean visible) {
-		// if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-		// // If the ViewPropertyAnimator API is available
-		// // (Honeycomb MR2 and later), use it to animate the
-		// // in-layout UI controls at the bottom of the
-		// // screen.
-		// if (mControlsHeight == 0) {
-		// mControlsHeight = controlsView.getHeight();
-		// }
-		// if (mShortAnimTime == 0) {
-		// mShortAnimTime = getResources().getInteger(
-		// android.R.integer.config_shortAnimTime);
-		// }
-		// controlsView
-		// .animate()
-		// .translationY(visible ? 0 : mControlsHeight)
-		// .setDuration(mShortAnimTime);
-		// } else {
-		// // If the ViewPropertyAnimator APIs aren't
-		// // available, simply show or hide the in-layout UI
-		// // controls.
-		// controlsView.setVisibility(visible ? View.VISIBLE
-		// : View.GONE);
-		// }
-		//
-		// if (visible && AUTO_HIDE) {
-		// // Schedule a hide().
-		// delayedHide(AUTO_HIDE_DELAY_MILLIS);
-		// }
-		// }
-		// });
-		//
-		// // Set up the user interaction to manually show or hide the system
-		// UI.
-		// contentView.setOnClickListener(new View.OnClickListener() {
-		// @Override
-		// public void onClick(View view) {
-		// if (TOGGLE_ON_CLICK) {
-		// mSystemUiHider.toggle();
-		// } else {
-		// mSystemUiHider.show();
-		// }
-		// }
-		// });
-
-		// Upon interacting with UI controls, delay any scheduled hide()
-		// operations to prevent the jarring behavior of controls going away
-		// while interacting with the UI.
-		// findViewById(R.id.dummy_button).setOnTouchListener(
-		// mDelayHideTouchListener);
-
 		lm = (LocationManager) getSystemService(LOCATION_SERVICE);
 
 	}
@@ -229,21 +128,11 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 	}
 
 	// @Override
-	// protected void onPostCreate(Bundle savedInstanceState) {
-	// super.onPostCreate(savedInstanceState);
-	//
-	// // Trigger the initial hide() shortly after the activity has been
-	// // created, to briefly hint to the user that UI controls
-	// // are available.
-	// delayedHide(100);
+	// public boolean onCreateOptionsMenu(Menu menu) {
+	// // Inflate the menu; this adds items to the action bar if it is present.
+	// getMenuInflater().inflate(R.menu.activity_aed_map, menu);
+	// return true;
 	// }
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.activity_aed_map, menu);
-		return true;
-	}
 
 	private void setUpMapIfNeeded() {
 		// Do a null check to confirm that we have not already instantiated the
@@ -491,7 +380,7 @@ public class AedMapActivity extends FragmentActivity implements LocationSource,
 	}
 
 	/**
-	 * InfoWindow
+	 * マーカーをタップした時に表示をするWindowです.
 	 * 
 	 * @author yamada.isao@gmail.com
 	 * 
