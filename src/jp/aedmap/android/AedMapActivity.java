@@ -10,6 +10,7 @@ import jp.aedmap.android.http.AsyncTaskCallback;
 import jp.aedmap.android.http.MarkerItem;
 import jp.aedmap.android.http.MarkerItemResult;
 import jp.aedmap.android.http.MarkerQueryAsyncTask;
+import jp.aedmap.android.util.ActivityUtils;
 import jp.aedmap.android.util.GeocodeManager;
 import jp.aedmap.android.util.MapUtils;
 import android.content.Context;
@@ -23,7 +24,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,7 +59,7 @@ public class AedMapActivity extends SherlockFragmentActivity implements
 	private static MapHandler mapHandler;
 	private GoogleMap mMap;
 	private ProgressBar progress;
-	private ImageView icList;
+	private View icList;
 	private LocationManager lm = null;
 
 	private Context ctx;
@@ -78,7 +78,7 @@ public class AedMapActivity extends SherlockFragmentActivity implements
 		progress.setIndeterminate(true);
 
 		// リストアイコン
-		icList = (ImageView) findViewById(R.id.ic_list);
+		icList = findViewById(R.id.ic_list);
 		icList.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -91,6 +91,26 @@ public class AedMapActivity extends SherlockFragmentActivity implements
 		});
 		lm = (LocationManager) getSystemService(LOCATION_SERVICE);
 
+		// ---------------------------------------------------------
+		// ボタンバー
+		// ---------------------------------------------------------
+		View resuscitation = findViewById(R.id.btn_resuscitation);
+		resuscitation.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				ActivityUtils.openHelp(AedMapActivity.this,
+						getString(R.string.url_resuscitation));
+			}
+		});
+		View ambulance = findViewById(R.id.btn_ambulance);
+		ambulance.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				ActivityUtils.dialAmbulance(AedMapActivity.this);
+			}
+		});
 	}
 
 	@Override

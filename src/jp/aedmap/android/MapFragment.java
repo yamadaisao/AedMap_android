@@ -9,6 +9,7 @@ import com.actionbarsherlock.app.SherlockMapFragment;
 import com.google.android.gms.maps.GoogleMap;
 
 public class MapFragment extends SherlockMapFragment {
+	@SuppressWarnings("unused")
 	private GoogleMap mMap;
 
 	@Override
