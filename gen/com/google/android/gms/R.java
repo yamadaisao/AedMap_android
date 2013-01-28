@@ -8,23 +8,23 @@ package com.google.android.gms;
 
 public final class R {
 	public static final class id {
-		public static final int terrain = 0x7f050012;
-		public static final int none = 0x7f050010;
-		public static final int satellite = 0x7f050011;
-		public static final int normal = 0x7f050001;
+		public static final int terrain = 0x7f060012;
+		public static final int none = 0x7f060010;
+		public static final int satellite = 0x7f060011;
+		public static final int normal = 0x7f060001;
 	}
 	public static final class string {
-		public static final int common_google_play_services_update_text = 0x7f0a0017;
-		public static final int common_google_play_services_install_button = 0x7f0a0012;
-		public static final int common_google_play_services_install_title = 0x7f0a000f;
-		public static final int common_google_play_services_install_text_phone = 0x7f0a0010;
-		public static final int common_google_play_services_update_button = 0x7f0a0019;
-		public static final int common_google_play_services_enable_title = 0x7f0a0013;
-		public static final int common_google_play_services_install_text_tablet = 0x7f0a0011;
-		public static final int common_google_play_services_unknown_issue = 0x7f0a0018;
-		public static final int common_google_play_services_enable_button = 0x7f0a0015;
-		public static final int common_google_play_services_update_title = 0x7f0a0016;
-		public static final int common_google_play_services_enable_text = 0x7f0a0014;
+		public static final int common_google_play_services_update_text = 0x7f0b0017;
+		public static final int common_google_play_services_install_button = 0x7f0b0012;
+		public static final int common_google_play_services_install_title = 0x7f0b000f;
+		public static final int common_google_play_services_install_text_phone = 0x7f0b0010;
+		public static final int common_google_play_services_update_button = 0x7f0b0019;
+		public static final int common_google_play_services_enable_title = 0x7f0b0013;
+		public static final int common_google_play_services_install_text_tablet = 0x7f0b0011;
+		public static final int common_google_play_services_unknown_issue = 0x7f0b0018;
+		public static final int common_google_play_services_enable_button = 0x7f0b0015;
+		public static final int common_google_play_services_update_title = 0x7f0b0016;
+		public static final int common_google_play_services_enable_text = 0x7f0b0014;
 	}
 	public static final class styleable {
 		public static final int MapAttrs_uiCompass = 6;

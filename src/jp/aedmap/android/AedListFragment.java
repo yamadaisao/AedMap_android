@@ -22,7 +22,6 @@ import com.google.android.gms.maps.model.LatLng;
 public class AedListFragment extends Fragment {
 
 	public static final String ARG_CURRENT = "current";
-	private static final boolean DEBUG_EMPTY = false;
 
 	View view;
 	ListView listView;
@@ -55,10 +54,8 @@ public class AedListFragment extends Fragment {
 			Collections.sort(list, new MarkerComparator());
 			// TextView の autoLinkがある場合は、
 			// getApplicationContextではなくthisを渡さないといけない.
-			if (DEBUG_EMPTY) {
-				listView.setAdapter(new AedListAdapter(getActivity(), data
-						.getLastResult().markers));
-			}
+			listView.setAdapter(new AedListAdapter(getActivity(), data
+					.getLastResult().markers));
 		}
 	}
 
@@ -124,8 +121,10 @@ public class AedListFragment extends Fragment {
 				holder.name.setText(item.name);
 				holder.adr.setText(item.adr);
 				holder.able.setText(item.able);
-				holder.src.setText(res.getString(R.string.label_src, item.src));
-				holder.spl.setText(res.getString(R.string.label_spl, item.spl));
+				holder.src.setText(res.getString(R.string.label_src_info,
+						item.src));
+				holder.spl.setText(res.getString(R.string.label_spl_info,
+						item.spl));
 				holder.dist.setText(res.getString(R.string.label_dist,
 						item.dist));
 			}

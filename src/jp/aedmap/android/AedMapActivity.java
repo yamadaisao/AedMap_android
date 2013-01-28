@@ -2,8 +2,10 @@ package jp.aedmap.android;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import jp.aedmap.android.http.AsyncTaskCallback;
@@ -13,6 +15,8 @@ import jp.aedmap.android.http.MarkerQueryAsyncTask;
 import jp.aedmap.android.util.ActivityUtils;
 import jp.aedmap.android.util.GeocodeManager;
 import jp.aedmap.android.util.MapUtils;
+import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
@@ -23,17 +27,27 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
@@ -41,6 +55,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.maps.GeoPoint;
 
 /**
  * Main activity of the aed map.
@@ -61,6 +76,10 @@ public class AedMapActivity extends SherlockFragmentActivity implements
 	private ProgressBar progress;
 	private View icList;
 	private LocationManager lm = null;
+
+	private Marker infoMarker = null;
+	private View btnAdd;
+	private View btnEdit;
 
 	private Context ctx;
 	private boolean isFirst = true;
@@ -111,6 +130,9 @@ public class AedMapActivity extends SherlockFragmentActivity implements
 				ActivityUtils.dialAmbulance(AedMapActivity.this);
 			}
 		});
+
+		btnAdd = findViewById(R.id.btn_add);
+		btnEdit = findViewById(R.id.btn_edit);
 	}
 
 	@Override
@@ -147,13 +169,6 @@ public class AedMapActivity extends SherlockFragmentActivity implements
 		}
 	}
 
-	// @Override
-	// public boolean onCreateOptionsMenu(Menu menu) {
-	// // Inflate the menu; this adds items to the action bar if it is present.
-	// getMenuInflater().inflate(R.menu.activity_aed_map, menu);
-	// return true;
-	// }
-
 	private void setUpMapIfNeeded() {
 		// Do a null check to confirm that we have not already instantiated the
 		// map.
@@ -187,6 +202,15 @@ public class AedMapActivity extends SherlockFragmentActivity implements
 								|| position.target.latitude != lastResult.queryLatitude || position.target.longitude != lastResult.queryLongitude)) {
 					getAddress(position.target);
 				}
+				checkInfoWindow();
+			}
+		});
+
+		mMap.setOnMapClickListener(new OnMapClickListener() {
+
+			@Override
+			public void onMapClick(LatLng point) {
+				checkInfoWindow();
 			}
 		});
 		mMap.setLocationSource(this);
@@ -199,6 +223,17 @@ public class AedMapActivity extends SherlockFragmentActivity implements
 						.show();
 			}
 		});
+
+	}
+
+	private void checkInfoWindow() {
+		if (infoMarker != null) {
+			if (infoMarker.isInfoWindowShown() == false) {
+				btnAdd.setVisibility(View.VISIBLE);
+				btnEdit.setVisibility(View.GONE);
+				infoMarker = null;
+			}
+		}
 	}
 
 	@Override
@@ -307,6 +342,20 @@ public class AedMapActivity extends SherlockFragmentActivity implements
 		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, zoomLevel));
 	}
 
+	private void moveCamera(Address addr) {
+		LatLng latlng = new LatLng(addr.getLatitude(), addr.getLongitude());
+		// Cameraの移動
+		float zoomLevel = 16f;
+		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, zoomLevel));
+	}
+
+	private void moveCamera(AddressView addr) {
+		LatLng latlng = new LatLng(addr.latitude, addr.longitude);
+		// Cameraの移動
+		float zoomLevel = 16f;
+		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, zoomLevel));
+	}
+
 	private static final String CURRENT_ADDRESS = "str_address";
 
 	/**
@@ -343,6 +392,147 @@ public class AedMapActivity extends SherlockFragmentActivity implements
 			}
 		};
 		searchAdress.start();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getSupportMenuInflater();
+		inflater.inflate(R.menu.activity_aed_map, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_search: {
+			onSearchRequested();
+			break;
+		}
+
+		default:
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	private AlertDialog dialog = null;
+
+	/**
+	 * 検索ダイアログで入力された文字列で住所検索を行います.
+	 */
+	@Override
+	public void onNewIntent(Intent intent) {
+		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			String query = intent.getStringExtra(SearchManager.QUERY);
+
+			// GeoCoderで地名検索させて、Addressに変換させた。
+			List<Address> addressList = GeocodeManager.address2Point(query,
+					this);
+			if (addressList == null) {
+				Toast.makeText(this, R.string.msg_query_fail, Toast.LENGTH_LONG)
+						.show();
+			} else {
+				if (addressList.size() == 0) {
+					Toast.makeText(this, R.string.msg_result_zero,
+							Toast.LENGTH_LONG).show();
+				} else if (addressList.size() == 1) {
+					Address address = addressList.get(0);
+					moveCamera(address);
+				} else {
+					final List<AddressView> rows = new ArrayList<AddressView>();
+					for (Address address : addressList) {
+						AddressView row = new AddressView();
+						row.address = GeocodeManager.concatAddress(address);
+						row.latitude = address.getLatitude();
+						row.longitude = address.getLongitude();
+						rows.add(row);
+					}
+					ListView lv = new ListView(this);
+					lv.setAdapter(new AddressAdapter(this,
+							R.layout.address_list, rows));
+					lv.setScrollingCacheEnabled(false);
+					lv.setOnItemClickListener(new OnItemClickListener() {
+						@Override
+						public void onItemClick(AdapterView<?> items,
+								View view, int position, long id) {
+							dialog.dismiss();
+							moveCamera(rows.get(position));
+						}
+					});
+					dialog = new AlertDialog.Builder(this)
+							.setTitle(R.string.msg_some_location)
+							.setPositiveButton(R.string.button_cancel, null)
+							.setView(lv).create();
+					dialog.show();
+
+				}
+			}
+		}
+	}
+
+	/**
+	 * 住所候補のViewHolder
+	 * 
+	 * @author yamadaisao
+	 * 
+	 */
+	static class ViewHolder {
+		TextView address;
+	}
+
+	/**
+	 * 住所候補のデータ
+	 * 
+	 * @author yamadaisao
+	 * 
+	 */
+	class AddressView {
+		String address;
+		double latitude;
+		double longitude;
+	}
+
+	/**
+	 * 住所検索の結果が複数あった場合のリスト表示用Adapter
+	 * 
+	 * @author yamadaisao
+	 * 
+	 */
+	private class AddressAdapter extends ArrayAdapter<AddressView> {
+		private final LayoutInflater inflater;
+		private final List<AddressView> list;
+		private final int rowLayout;
+
+		public AddressAdapter(Context context, int textViewResourceId,
+				List<AddressView> objects) {
+			super(context, textViewResourceId, objects);
+			inflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			list = objects;
+			rowLayout = textViewResourceId;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View view = convertView;
+			ViewHolder holder;
+			if (convertView == null) {
+				holder = new ViewHolder();
+				view = inflater.inflate(rowLayout, null);
+				holder.address = (TextView) view.findViewById(R.id.address);
+				view.setTag(holder);
+			} else {
+				holder = (ViewHolder) view.getTag();
+			}
+			AddressView address = list.get(position);
+			if (address != null) {
+				holder.address.setText(address.address);
+			}
+			return view;
+		}
+	}
+
+	public void moveToSearchResult(GeoPoint geoPoint) {
 	}
 
 	private static final int MSG_ADDRESS = 1;
@@ -458,42 +648,13 @@ public class AedMapActivity extends SherlockFragmentActivity implements
 			} else {
 				spl.setVisibility(View.GONE);
 			}
+
+			btnAdd.setVisibility(View.GONE);
+			btnEdit.setVisibility(View.VISIBLE);
+			infoMarker = marker;
 			return mWindow;
 		}
 	}
-
-	/**
-	 * Touch listener to use for in-layout UI controls to delay hiding the
-	 * system UI. This is to prevent the jarring behavior of controls going away
-	 * while interacting with activity UI.
-	 */
-	// View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener()
-	// {
-	// @Override
-	// public boolean onTouch(View view, MotionEvent motionEvent) {
-	// if (AUTO_HIDE) {
-	// delayedHide(AUTO_HIDE_DELAY_MILLIS);
-	// }
-	// return false;
-	// }
-	// };
-
-	// Handler mHideHandler = new Handler();
-	// Runnable mHideRunnable = new Runnable() {
-	// @Override
-	// public void run() {
-	// mSystemUiHider.hide();
-	// }
-	// };
-
-	/**
-	 * Schedules a call to hide() in [delay] milliseconds, canceling any
-	 * previously scheduled calls.
-	 */
-	// private void delayedHide(int delayMillis) {
-	// mHideHandler.removeCallbacks(mHideRunnable);
-	// mHideHandler.postDelayed(mHideRunnable, delayMillis);
-	// }
 
 	// --------------------------------------------------------------------------------
 	// unused methods
